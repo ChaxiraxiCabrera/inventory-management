@@ -6,6 +6,7 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -112,6 +113,8 @@ export default {
     onTimeDelivery: 'On-Time Delivery',
     itemsCount: '{count} items',
     quantity: 'Qty',
+    submittedOrders: 'Submitted Orders',
+    leadTimeDays: '{days} days',
     table: {
       orderNumber: 'Order Number',
       orderId: 'Order ID',
@@ -124,6 +127,7 @@ export default {
       value: 'Value',
       totalValue: 'Total Value',
       status: 'Status',
+      leadTime: 'Lead Time',
       expectedDelivery: 'Expected Delivery',
       actualDelivery: 'Actual Delivery'
     }
@@ -186,6 +190,56 @@ export default {
       trend: 'Trend',
       period: 'Period'
     }
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking',
+    description: 'Set a budget and order the items the demand forecast says you will run short of',
+    filterNote: 'Recommendations follow the Location and Category filters. Time Period and Order Status do not apply.',
+    budget: {
+      title: 'Available Budget',
+      label: 'Budget',
+      hint: 'Move the slider to see which items fit your budget'
+    },
+    stats: {
+      itemsRecommended: 'Items Recommended',
+      totalCost: 'Total Cost',
+      remainingBudget: 'Remaining Budget',
+      unfundedItems: 'Unfunded Items'
+    },
+    recommendations: 'Recommended Items',
+    unfunded: 'Not Covered by This Budget',
+    unfundedHint: 'Increase the budget to {amount} to add {item}',
+    adequatelyStocked: '{count} forecast items are adequately stocked and were excluded',
+    table: {
+      rank: '#',
+      sku: 'SKU',
+      itemName: 'Item Name',
+      trend: 'Trend',
+      onHand: 'On Hand',
+      forecastedDemand: 'Forecast',
+      orderQuantity: 'Order Qty',
+      unitCost: 'Unit Cost',
+      lineTotal: 'Line Total',
+      leadTime: 'Lead Time',
+      shortBy: 'Short By'
+    },
+    summary: {
+      title: 'Order Summary',
+      items: '{count} items',
+      leadTime: 'Longest lead time: {days} days',
+      expectedDelivery: 'Estimated delivery: {date}'
+    },
+    days: '{days} days',
+    placeOrder: 'Place Order',
+    placingOrder: 'Placing Order...',
+    orderPlaced: 'Restocking order {orderNumber} submitted',
+    orderPlacedDetail: '{count} items, {total}, expected delivery {date}',
+    viewInOrders: 'View in Orders',
+    submitError: 'Failed to place restocking order',
+    noRecommendations: 'No items fit this budget. Increase the budget to see recommendations.',
+    noShortages: 'No items are forecast to run short. Nothing to restock.'
   },
 
   // Filters

@@ -1,8 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
+from datetime import datetime, timedelta
 from pydantic import BaseModel
-from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders
+from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders, restock_orders
 
 app = FastAPI(title="Factory Inventory Management System")
 
@@ -13,6 +14,18 @@ QUARTER_MAP = {
     'Q3-2025': ['2025-07', '2025-08', '2025-09'],
     'Q4-2025': ['2025-10', '2025-11', '2025-12']
 }
+
+# Supplier lead time in days by product category, used to compute a restock
+# order's expected delivery. Order-level lead time is the max across its items.
+CATEGORY_LEAD_TIMES = {
+    'Circuit Boards': 14,
+    'Sensors': 7,
+    'Power Supplies': 10,
+    'Actuators': 12,
+    'Controllers': 21
+}
+
+DEFAULT_LEAD_TIME_DAYS = 14
 
 def filter_by_month(items: list, month: Optional[str]) -> list:
     """Filter items by month/quarter based on order_date field"""
@@ -120,6 +133,32 @@ class CreatePurchaseOrderRequest(BaseModel):
     expected_delivery_date: str
     notes: Optional[str] = None
 
+class RestockOrderItem(BaseModel):
+    sku: str
+    quantity: int
+    # Enriched by the server from the matching inventory item, so the client
+    # cannot supply its own prices. Same pattern as BacklogItem.has_purchase_order.
+    name: Optional[str] = None
+    category: Optional[str] = None
+    unit_cost: Optional[float] = None
+    line_total: Optional[float] = None
+    lead_time_days: Optional[int] = None
+
+class CreateRestockOrderRequest(BaseModel):
+    budget: float
+    items: List[RestockOrderItem]
+
+class RestockOrder(BaseModel):
+    id: str
+    order_number: str
+    items: List[RestockOrderItem]
+    status: str
+    order_date: str
+    expected_delivery: str
+    lead_time_days: int
+    total_value: float
+    budget: float
+
 # API endpoints
 @app.get("/")
 def root():
@@ -178,6 +217,69 @@ def get_backlog():
         item_dict["has_purchase_order"] = has_po
         result.append(item_dict)
     return result
+
+@app.post("/api/restock-orders", response_model=RestockOrder, status_code=201)
+def create_restock_order(request: CreateRestockOrderRequest):
+    """Create a restocking order from budget-based recommendations"""
+    if not request.items:
+        raise HTTPException(status_code=400, detail="Restock order must contain at least one item")
+
+    enriched_items = []
+    total_value = 0.0
+    lead_time_days = 0
+
+    for line in request.items:
+        if line.quantity <= 0:
+            raise HTTPException(status_code=400, detail="Quantity must be greater than zero")
+
+        inventory_item = next((item for item in inventory_items if item["sku"] == line.sku), None)
+        if not inventory_item:
+            raise HTTPException(status_code=404, detail="Item not found")
+
+        # Lead time is driven by the item's category; unknown categories fall back
+        item_lead_time = CATEGORY_LEAD_TIMES.get(inventory_item["category"], DEFAULT_LEAD_TIME_DAYS)
+        line_total = round(line.quantity * inventory_item["unit_cost"], 2)
+
+        enriched_items.append({
+            "sku": line.sku,
+            "quantity": line.quantity,
+            "name": inventory_item["name"],
+            "category": inventory_item["category"],
+            "unit_cost": inventory_item["unit_cost"],
+            "line_total": line_total,
+            "lead_time_days": item_lead_time
+        })
+        total_value += line_total
+        lead_time_days = max(lead_time_days, item_lead_time)
+
+    sequence = len(restock_orders) + 1
+    order_date = datetime.now()
+    expected_delivery = order_date + timedelta(days=lead_time_days)
+
+    restock_order = {
+        "id": f"RST-{sequence}",
+        "order_number": f"RST-{order_date.year}-{sequence:04d}",
+        "items": enriched_items,
+        "status": "Processing",
+        "order_date": order_date.strftime("%Y-%m-%dT%H:%M:%S"),
+        "expected_delivery": expected_delivery.strftime("%Y-%m-%dT%H:%M:%S"),
+        "lead_time_days": lead_time_days,
+        "total_value": round(total_value, 2),
+        "budget": request.budget
+    }
+    # Append in place - rebinding would orphan this from mock_data.restock_orders
+    restock_orders.append(restock_order)
+    return restock_order
+
+@app.get("/api/restock-orders", response_model=List[RestockOrder])
+def get_restock_orders():
+    """Get all submitted restocking orders"""
+    return restock_orders
+
+@app.get("/api/restock-lead-times")
+def get_restock_lead_times():
+    """Get supplier lead times in days by product category"""
+    return CATEGORY_LEAD_TIMES
 
 @app.get("/api/dashboard/summary")
 def get_dashboard_summary(

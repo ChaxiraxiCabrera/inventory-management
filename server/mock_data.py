@@ -35,5 +35,11 @@ recent_transactions = load_json_file('transactions.json')
 # Load purchase orders
 purchase_orders = load_json_file('purchase_orders.json')
 
+# Restock orders are created at runtime via POST /api/restock-orders.
+# Intentionally NOT loaded from or written to disk - they live for the lifetime
+# of the process and reset on restart. Kept separate from `orders` because a
+# restock order has no customer and would fail the Order response_model.
+restock_orders = []
+
 # All data is now loaded from JSON files in the data/ directory
 # This allows for easier maintenance and updates of the sample data

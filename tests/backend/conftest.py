@@ -21,6 +21,19 @@ def client():
         yield test_client
 
 
+@pytest.fixture(autouse=True)
+def reset_restock_orders():
+    """Snapshot and restore the in-memory restock order list around every test."""
+    import mock_data
+
+    snapshot = list(mock_data.restock_orders)
+    yield
+    # Mutate in place - main.py binds its own name to this same list object,
+    # so rebinding here would silently orphan the endpoints from this list.
+    mock_data.restock_orders.clear()
+    mock_data.restock_orders.extend(snapshot)
+
+
 @pytest.fixture
 def sample_inventory_item():
     """Sample inventory item for testing."""
