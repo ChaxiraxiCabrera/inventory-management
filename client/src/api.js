@@ -43,6 +43,21 @@ export const api = {
     return response.data
   },
 
+  async createRestockOrder(restockOrderData) {
+    const response = await axios.post(`${API_BASE_URL}/restock-orders`, restockOrderData)
+    return response.data
+  },
+
+  async getRestockOrders() {
+    const response = await axios.get(`${API_BASE_URL}/restock-orders`)
+    return response.data
+  },
+
+  async getRestockLeadTimes() {
+    const response = await axios.get(`${API_BASE_URL}/restock-lead-times`)
+    return response.data
+  },
+
   async getDashboardSummary(filters = {}) {
     const params = new URLSearchParams()
     if (filters.warehouse && filters.warehouse !== 'all') params.append('warehouse', filters.warehouse)

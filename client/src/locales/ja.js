@@ -6,6 +6,7 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    restocking: '在庫補充',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -112,6 +113,8 @@ export default {
     onTimeDelivery: '定時配達',
     itemsCount: '{count}件',
     quantity: '数量',
+    submittedOrders: '送信済みの補充発注',
+    leadTimeDays: '{days}日',
     table: {
       orderNumber: '注文番号',
       orderId: '注文ID',
@@ -124,6 +127,7 @@ export default {
       value: '価格',
       totalValue: '合計金額',
       status: 'ステータス',
+      leadTime: 'リードタイム',
       expectedDelivery: '予定配達日',
       actualDelivery: '実際の配達日'
     }
@@ -186,6 +190,56 @@ export default {
       trend: 'トレンド',
       period: '期間'
     }
+  },
+
+  // Restocking
+  restocking: {
+    title: '在庫補充',
+    description: '予算を設定し、需要予測で不足が見込まれる品目を発注します',
+    filterNote: '推奨は「場所」と「カテゴリ」フィルターに従います。「期間」と「注文ステータス」は適用されません。',
+    budget: {
+      title: '利用可能な予算',
+      label: '予算',
+      hint: 'スライダーを動かすと、予算内に収まる品目が表示されます'
+    },
+    stats: {
+      itemsRecommended: '推奨品目数',
+      totalCost: '合計金額',
+      remainingBudget: '残りの予算',
+      unfundedItems: '予算超過の品目'
+    },
+    recommendations: '推奨品目',
+    unfunded: '今回の予算に含まれない品目',
+    unfundedHint: '予算を{amount}に増やすと{item}を追加できます',
+    adequatelyStocked: '在庫が十分な{count}件の予測品目を除外しました',
+    table: {
+      rank: '#',
+      sku: 'SKU',
+      itemName: '品目名',
+      trend: 'トレンド',
+      onHand: '在庫数',
+      forecastedDemand: '予測需要',
+      orderQuantity: '発注数量',
+      unitCost: '単価',
+      lineTotal: '小計',
+      leadTime: 'リードタイム',
+      shortBy: '不足額'
+    },
+    summary: {
+      title: '発注サマリー',
+      items: '{count}件',
+      leadTime: '最長リードタイム: {days}日',
+      expectedDelivery: '納品予定日: {date}'
+    },
+    days: '{days}日',
+    placeOrder: '発注する',
+    placingOrder: '発注処理中...',
+    orderPlaced: '補充発注 {orderNumber} を送信しました',
+    orderPlacedDetail: '{count}件、{total}、納品予定日 {date}',
+    viewInOrders: '注文一覧で見る',
+    submitError: '補充発注の送信に失敗しました',
+    noRecommendations: 'この予算に収まる品目はありません。予算を増やしてください。',
+    noShortages: '不足が見込まれる品目はありません。補充は不要です。'
   },
 
   // Filters
